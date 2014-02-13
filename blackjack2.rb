@@ -103,34 +103,85 @@ class Dealer
     @name = "Dealer"
     @cards = []
   end
+
+  def dealer_play
+    while total < 16
+      dealer.show_hand
+      dealer.add_card(deck.deal_one)
+      puts "Dealer hits and draws a: #{card}"
+      puts "Dealer's total is now: #{total}"
+      if total > 21
+        puts "Congrats, the dealer busted. You win!"
+        exit
+      elsif total == 21
+        puts "Sorry, but dealer got blackjack. You lose."
+        exit
+      end
+    end
+  end
 end
 
 
-#actions:
-class DealCards
+# Game Engine
+
+puts "Welcome to Blackjack"
+puts "Are you ready to play a game? (Y/N)"
+
+answer = gets.chomp
+
+if answer == 'N'
+  exit
 end
 
-class Hit
-end
+puts "First, please enter your name..."
 
-class Stay
-end
+player_name = gets.chomp
+
+puts "Alright #{player_name}, let's get started"
 
 deck = Deck.new
+player = Player.new("#{player_name}")
+dealer = Dealer.new
 
-player = Player.new("Tyler")
-player.add_card(deck.deal_one)
 player.add_card(deck.deal_one)
 player.add_card(deck.deal_one)
 player.show_hand
-player.busted?
 
-dealer = Dealer.new
-dealer.add_card(deck.deal_one)
-dealer.add_card(deck.deal_one)
-dealer.add_card(deck.deal_one)
+player.add_card(deck.deal_one)
+#puts "The dealer is showing #{card}"
+
+puts "What would you like to do? H for Hit or S for Stay?"
+
+action = gets.chomp
+
+if action.upcase == 'H'
+  player.add_card(deck.deal_one)
+  player.show_hand
+    if player.busted? == true
+      puts "Sorry you busted"
+      dealer.add_card(deck.deal_one)
+      dealer.show_hand
+      exit
+    end
+elsif action.upcase == 'S'
+  dealer.add_Card(deck.deal_one)
+  dealer.dealer_play
+end
+
+
+player.show_hand
 dealer.show_hand
-dealer.busted?
+
+
+# if handtotal > dealertotal
+#   puts "You win!! Great Job"
+# elsif dealertotal > handtotal
+#   puts "Sorry, but the dealer won..."
+# else dealertotal == handtotal
+#   puts "sorry, tie goes to the house...you lose"
+# end
+
+
 
 
 
