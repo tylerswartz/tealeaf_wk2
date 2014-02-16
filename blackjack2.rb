@@ -76,8 +76,8 @@ module Hand
     cards << new_card
   end
 
-  def busted?
-    total > 21
+  def is_busted?
+    total > Blackjack::BLACKJACK_AMOUNT
   end
 
 end
@@ -104,84 +104,145 @@ class Dealer
     @cards = []
   end
 
-  def dealer_play
-    while total < 16
-      dealer.show_hand
-      dealer.add_card(deck.deal_one)
-      puts "Dealer hits and draws a: #{card}"
-      puts "Dealer's total is now: #{total}"
-      if total > 21
-        puts "Congrats, the dealer busted. You win!"
-        exit
-      elsif total == 21
-        puts "Sorry, but dealer got blackjack. You lose."
-        exit
-      end
-    end
+  def show_flop
+    puts "---- Dealer's Hand ----"
+    puts "=> The first card is hidden"
+    puts "=> #{cards[1]}"
   end
 end
 
 
 # Game Engine
 
-puts "Welcome to Blackjack"
-puts "Are you ready to play a game? (Y/N)"
+class Blackjack
+  attr_accessor :deck, :player, :dealer
 
-answer = gets.chomp
+  BLACKJACK_AMOUNT = 21
+  DEALER_HIT_MIN = 17
 
-if answer == 'N'
-  exit
-end
+  def initialize
+    @deck = Deck.new
+    @player = Player.new("Player1")
+    @dealer = Dealer.new
+  end
 
-puts "First, please enter your name..."
+  def set_player_name
+    puts "Please enter your name."
+    player.name = gets.chomp
+  end
 
-player_name = gets.chomp
+  def deal_cards
+    player.add_card(deck.deal_one)
+    dealer.add_card(deck.deal_one)
+    player.add_card(deck.deal_one)
+    dealer.add_card(deck.deal_one)
+  end
 
-puts "Alright #{player_name}, let's get started"
+  def show_flop
+    player.show_hand
+    dealer.show_flop
+  end
 
-deck = Deck.new
-player = Player.new("#{player_name}")
-dealer = Dealer.new
+  def blackjack_or_bust?(player_or_dealer)
+    if player_or_dealer.total == BLACKJACK_AMOUNT
+      if player_or_dealer.is_a?(Dealer)
+        puts "Sorry, dealer hit blackjack. #{player.name} loses."
+      else
+        puts "Congrats, #{player.name} hit blackjack!"
+      exit
+      end
+    elsif player_or_dealer.is_busted?
+      if player_or_dealer.is_a?(Dealer)
+        puts "Congrats! Dealer busted! #{player.name} wins!"
+      else
+        puts "#{player.name} busted. Dealer wins."
+      end
+      play_again?
+    end
+  end
 
-player.add_card(deck.deal_one)
-player.add_card(deck.deal_one)
-player.show_hand
+  def player_turn
+    puts "#{player.name}'s turn."
 
-player.add_card(deck.deal_one)
-#puts "The dealer is showing #{card}"
+    blackjack_or_bust?(player)
 
-puts "What would you like to do? H for Hit or S for Stay?"
+    while !player.is_busted?
+      puts "What would you like to do? H for Hit or S for Stay?"
+      action = gets.chomp
 
-action = gets.chomp
+      if !['H','S'].include?(action)
+        puts "Error: you must enter an uppercase H or S"
+      next
+      end
 
-if action.upcase == 'H'
-  player.add_card(deck.deal_one)
-  player.show_hand
-    if player.busted? == true
-      puts "Sorry you busted"
-      dealer.add_card(deck.deal_one)
-      dealer.show_hand
+      if action == 'S'
+        puts "#{player.name} chose to stay at #{player.total}"
+        break
+      end
+
+      new_card = deck.deal_one
+      puts "Dealing card to #{player.name}: #{new_card}"
+      player.add_card(new_card)
+      puts "#{player.name} total is now: #{player.total}"
+
+      blackjack_or_bust?(player)
+    end    
+  end
+
+  def dealer_turn
+    puts "Dealer's turn."
+
+    blackjack_or_bust?(dealer)
+    while dealer.total < DEALER_HIT_MIN
+      new_card = deck.deal_one
+      puts "Dealing card to dealer: #{new_card}"
+      dealer.add_card(new_card)
+      puts "Dealer total is now: #{dealer.total}"
+
+      blackjack_or_bust?(dealer)
+    end
+    puts
+    puts "Dealer's stays at #{dealer.total}"
+  end
+
+  def who_won?
+    if player.total > dealer.total
+      puts "Congrats. #{player.name} wins!"
+    elsif player.total < dealer.total
+      puts "Sorry, dealer wins."
+    else
+      puts "It's a tie..."
+    end
+    play_again?
+  end
+
+  def play_again?
+    puts ""
+    puts "Would you like to play again? Y for Yes, N for No"
+    
+    if gets.chomp == 'Y'
+      puts "Starting new game..."
+      puts ""
+      deck = Deck.new_card
+      player.cards = []
+      dealer.cards = []
+      start
+    else
+      puts "Thanks for playing. Goodbye!"
       exit
     end
-elsif action.upcase == 'S'
-  dealer.add_Card(deck.deal_one)
-  dealer.dealer_play
+  end
+
+  def start
+    set_player_name
+    deal_cards
+    show_flop
+    player_turn
+    dealer_turn
+    who_won?
+  end
 end
 
-
-player.show_hand
-dealer.show_hand
-
-
-# if handtotal > dealertotal
-#   puts "You win!! Great Job"
-# elsif dealertotal > handtotal
-#   puts "Sorry, but the dealer won..."
-# else dealertotal == handtotal
-#   puts "sorry, tie goes to the house...you lose"
-# end
-
-
-
-
+game = Blackjack.new
+game.start
 
