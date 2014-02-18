@@ -25,8 +25,8 @@ class Deck
       ['Hearts','Diamonds','Spades','Clubs'].each do |suit|
         @cards << Card.new(face_value, suit)
       end
+      scramble!
     end
-    scramble!
   end
 
   def scramble!
