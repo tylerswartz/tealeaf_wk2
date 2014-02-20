@@ -139,10 +139,30 @@ class Blackjack
 		dealer.show_flop
 	end
 
+	def hit_blackjack?(player_or_dealer)
+		if player_or_dealer.total == 21
+			if player_or_dealer.is_a?(Dealer)
+				puts "Sorry, but dealer has 21."
+			else
+				puts "Congrats, you have 21!"
+			play_again?
+			end
+		elsif player_or_dealer.is_busted?
+			if player_or_dealer.is_a?(Dealer)
+				puts "Congrats, the dealer busted."
+			else
+				puts "Sorry, you busted."
+				dealer.show_hand
+			end
+			play_again?
+		end
+	end
+
 	def player_action
 		puts "#{player.name}'s turn."
 
 		hit_blackjack?(player)
+
 		while !player.is_busted?
 			puts "What would you like to do? H for Hit, S for Stay."
 			response = gets.chomp
@@ -150,6 +170,7 @@ class Blackjack
 			if !['H','S'].include?(response)
 				puts "Error: Please enter an uppercase H or S"
 				next
+			end
 
 			if response == 'S'
 				puts "You chose to stay."
@@ -160,17 +181,66 @@ class Blackjack
 				new_card = deck.deal_one
 				puts "Dealing card to #{player.name}..."
 				"#{new_card}"
-				player.add_card(new_Card)
-
+				player.add_card(new_card)
+				puts "=> Total is: #{player.total}"
+				
+				hit_blackjack?(player)	
+			end
+		end
 	end
+
+	def dealer_action
+		dealer.show_hand
+		
+		while dealer.total < 17
+		  new_card = deck.deal_one
+		  puts "Dealer hits & draws a..."
+		  "#{new_card}"
+		  dealer.add_card(new_card)
+		  puts "=> Total is: #{dealer.total}"
+		  if dealer.total > 21
+		    puts "Congrats, the dealer busted...with a total of #{dealer.total}"
+		    play_again?
+		  elsif dealer.total == 21
+		    puts "Sorry, but dealer got blackjack"
+		    play_again?
+		  end
+		end
+	end
+
+	def who_wins?
+		if dealer.total >= player.total
+			puts "Sorry #{player.name}, but the dealer wins."
+		else 
+			puts "Congrats #{player.name}, you win!"
+		end
+		play_again?
+	end
+
+	def play_again?
+		puts ""
+		puts "Would you like to play again? Y for Yes, N for No"
+		answer = gets.chomp
+		if answer.upcase == 'Y'
+			puts "----- Starting the game -----"
+			deck = Deck.new
+			player.cards = []
+			dealer.cards = []
+			start
+		else
+			puts "Goodbye."
+			exit
+		end
+	end
+
 
 	def start
 		add_player
 		deal_cards
 		show_flop
-		# player_action
-		# dealer_action
-		# who_wins?
+		player_action
+		dealer_action
+		who_wins?
 	end
 end
 
