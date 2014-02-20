@@ -1,0 +1,37 @@
+Name what each of the below is:
+  a = 1  (Local variable)
+  # => ex. a is a local variable, and is a Fixnum object with value 1 
+  @a = 2 (instance variable)
+  user = User.new (new instance object)
+  user.name (calling name getter method)
+  user.name = "Joe" (calling setter instance method)
+
+
+How does a class mixin a module?
+Use: include Module (ex: include Hand) at the beginning of the class.
+
+What's the difference between class variables and instance variables?
+Class variables are shared among the class and its desendents and is denoted with @@. An instance variable is not and uses a single @.
+
+What does attr_accessor do?
+Allows quick retrieval and setting of the obect state. 
+
+How would you describe this expression: Dog.some_method
+This method is for the class Dog and it defines some_method as an action.
+
+In Ruby, what's the difference between subclassing and mixing in modules?
+From answer sheet: "Subclassing is when the classes is a relationship and has a single inheritance. For example, a Dog subclass will inherit all of the behaviors of an Animal superclass.
+
+Mixing in modules is called composition and it is when classes has a relationship. This is usually when classes have multiple inheritances or when certain behaviors are shared among classes, but not every single one of them."
+
+Given that I can instantiate a user like this: User.new('Bob'), what would the initialize method look like for the User class?
+	def initialize(name)
+		@name = name
+	end
+
+
+Can you call instance methods of the same class from other instance methods in that class?
+Yes.
+
+When you get stuck, what's the process you use to try to trap the error?
+Look up the line that has the error and then slowly walk through all the processes that line is doing. Rubber Duck strategy. I need to get better at using Pry. 
